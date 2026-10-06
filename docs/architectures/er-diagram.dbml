@@ -1,0 +1,107 @@
+Enum project_status {
+  active
+  inactive
+}
+
+Enum project_role {
+  owner
+  editor
+  viewer
+}
+
+Enum task_status {
+  todo
+  in_progress
+  done
+  cancelled
+}
+
+Enum task_priority {
+  low
+  normal
+  high
+}
+
+
+Table users {
+  id bigint [pk, increment]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  display_name varchar(100)
+  created_at timestamp [not null]
+}
+
+
+Table projects {
+  id bigint [pk, increment]
+  name varchar(255) [not null]
+  description text
+  status project_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+
+Table project_members {
+  user_id bigint [not null, ref: > users.id]
+  project_id bigint [not null, ref: > projects.id]
+
+  role project_role [not null]
+  joined_at timestamp [not null]
+
+  indexes {
+    (user_id, project_id) [pk]
+  }
+}
+
+
+Table tasks {
+  id bigint [pk, increment]
+
+  project_id bigint [not null, ref: > projects.id]
+  parent_task_id bigint [ref: > tasks.id]
+
+  title varchar(255) [not null]
+  description text
+
+  status task_status [not null]
+  priority task_priority [not null]
+
+  due_at timestamp
+
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+
+Table reminders {
+  id bigint [pk, increment]
+
+  task_id bigint [not null, ref: > tasks.id]
+
+  remind_at timestamp [not null]
+  sent_at timestamp
+}
+
+
+Table tags {
+  id bigint [pk, increment]
+
+  project_id bigint [not null, ref: > projects.id]
+
+  name varchar(100) [not null]
+
+  indexes {
+    (project_id, name) [unique]
+  }
+}
+
+
+Table task_tags {
+  task_id bigint [not null, ref: > tasks.id]
+  tag_id bigint [not null, ref: > tags.id]
+
+  indexes {
+    (task_id, tag_id) [pk]
+  }
+}
